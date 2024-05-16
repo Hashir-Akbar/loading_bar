@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Bar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #dee1de;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+
+        .card_loader {
+            width: 100%;
+            max-width: 500px;
+            background-color: #ebebeb;
+            border: 2px solid rgba(0, 0, 0, 0.425);
+            border-radius: 4px;
+            padding: 1em;
+            display: flex;
+            flex-direction: column;
+            gap: 4em;
+            align-items: center;
+        }
+
+        .card_loader p {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-top: 20px;
+        }
+
+        .card_loader img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            opacity: 0;
+            transition: 250ms all ease-in-out;
+
+        }
+
+        #container {
+            width: 300px;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background-color: #c6c6c6;
+            border-radius: 10px;
+            position: absolute;
+            animation: fillProgress 30s linear forwards;
+            /* Animation for filling progress */
+        }
+
+        #progressText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: #000;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        @keyframes fillProgress {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card_loader">
+        <p class="loader_desc">Checking 3 warehouses for available stock...</p>
+        <div class="image-container"></div> <!-- Add this div -->
+        <div id="container">
+            <div id="progressBar"></div>
+            <div id="progressText">0%</div>
+        </div>
+    </div>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            let loaderChangesShown = [
+                {
+                    "loaderDesc": "Checking 3 warehouses for available stock...",
+                    "loaderUrl": "https://www.svgrepo.com/show/508699/landscape-placeholder.svg"
+                },
+                {
+                    "loaderDesc": "Limited stock available in warehouse 2. Reserving your units...",
+                    "loaderUrl": "/check.png"
+                },
+                {
+                    "loaderDesc": "Discount available....",
+                    "loaderUrl": "/check-1.png"
+                }
+            ];
+
+            var progressBar = document.getElementById("progressBar");
+            var progressText = document.getElementById("progressText");
+            var paragraph = document.querySelector(".loader_desc");
+            var imageContainer = document.querySelector(".image-container");
+            var startTime = Date.now();
+            var duration = 30000; // 30 seconds
+            var previousImageUrl = null; // Variable to store the previous image URL
+
+            function updateProgress() {
+                var elapsedTime = Date.now() - startTime;
+                var progress = Math.min((elapsedTime / duration) * 100, 100);
+                progressBar.style.width = progress + "%";
+                progressText.textContent = Math.round(progress) + "%";
+                progressText.style.opacity = 1;
+
+                // Determine the stage based on time intervals
+                var stage = Math.floor((elapsedTime / duration) * loaderChangesShown.length);
+                stage = Math.min(stage, loaderChangesShown.length - 1); // Ensure stage is within bounds
+
+                paragraph.textContent = loaderChangesShown[stage].loaderDesc;
+
+                // Check if the image URL has changed
+                if (loaderChangesShown[stage].loaderUrl !== previousImageUrl) {
+                    // Create a new image element
+                    var newImage = new Image();
+                    newImage.src = loaderChangesShown[stage].loaderUrl;
+                    newImage.classList.add("loader_url");
+                    newImage.style.opacity = 0; // Set initial opacity to 0
+
+                    // Fade in the new image
+                    setTimeout(function () {
+                        newImage.style.opacity = 1;
+                    }, 200); // Adjust timing as needed
+
+                    // Remove previous image and append the new one
+                    while (imageContainer.firstChild) {
+                        imageContainer.removeChild(imageContainer.firstChild);
+                    }
+                    imageContainer.appendChild(newImage);
+
+                    previousImageUrl = loaderChangesShown[stage].loaderUrl; // Update previous image URL
+                }
+
+                // Check if progress is complete and redirect
+                if (progress >= 100) {
+                    console.log("Redirecting...");
+                    // Redirect when progress reaches 100%
+                    window.location.href = "checkout.html";
+                } else if (elapsedTime < duration) {
+                    // Continue updating progress
+                    requestAnimationFrame(updateProgress);
+                } else {
+                    // Handle error case or fallback behavior
+                    console.error("Error: Progress duration exceeded without completion.");
+                    // Optionally, you can redirect to an error page or perform another action
+                }
+            }
+
+            updateProgress();
+        });
+
+
+    </script>
+</body>
+
+</html>
